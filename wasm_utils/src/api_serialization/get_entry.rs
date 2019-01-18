@@ -13,6 +13,7 @@ pub enum StatusRequestKind {
     Latest,
     All,
 }
+
 impl Default for StatusRequestKind {
     fn default() -> Self {
         StatusRequestKind::Latest
@@ -20,12 +21,12 @@ impl Default for StatusRequestKind {
 }
 
 /// Structure used to specify what should be returned to a call to get_entry_result()
-/// The default is to return the latest entry.
+/// The default is to return the latest entry without headers
 #[derive(Deserialize, Debug, Serialize, DefaultJson, PartialEq, Clone)]
 pub struct GetEntryOptions {
     pub status_request: StatusRequestKind,
     pub entry: bool,
-    pub header: bool,
+    pub headers: bool,
     pub sources: bool,
 }
 
@@ -34,7 +35,7 @@ impl Default for GetEntryOptions {
         GetEntryOptions {
             status_request: StatusRequestKind::default(),
             entry: true,
-            header: false,
+            headers: false,
             sources: false,
         }
     }
@@ -44,13 +45,13 @@ impl GetEntryOptions {
     pub fn new(
         status_request: StatusRequestKind,
         entry: bool,
-        header: bool,
+        headers: bool,
         sources: bool,
     ) -> Self {
         GetEntryOptions {
             status_request,
             entry,
-            header,
+            headers,
             sources,
         }
     }
@@ -78,6 +79,7 @@ pub struct GetEntryResultItem {
     pub meta: Option<EntryResultMeta>,
     pub entry: Option<Entry>,
 }
+
 impl GetEntryResultItem {
     pub fn new(maybe_entry_with_meta: Option<&EntryWithMeta>) -> Self {
         match maybe_entry_with_meta {
@@ -94,6 +96,10 @@ impl GetEntryResultItem {
                 entry: None,
             },
         }
+    }
+
+    pub fn found(&self) -> bool {
+        self.meta.is_some()
     }
 }
 
@@ -156,7 +162,7 @@ impl GetEntryResult {
     }
     pub fn found(&self) -> bool {
         match self.result {
-            GetEntryResultType::Single(ref item) => item.meta.is_some(),
+            GetEntryResultType::Single(ref item) => item.found(),
             GetEntryResultType::All(ref history) => !history.items.is_empty(),
         }
     }
