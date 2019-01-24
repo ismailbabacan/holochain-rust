@@ -3,6 +3,7 @@ use holochain_core_types::{
     cas::{content::Address, storage::ContentAddressableStorage},
     eav::{EntityAttributeValue, EntityAttributeValueStorage},
     error::HolochainError,
+    link::Link,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -17,6 +18,7 @@ pub struct DhtStore {
     content_storage: Arc<RwLock<ContentAddressableStorage>>,
     meta_storage: Arc<RwLock<EntityAttributeValueStorage>>,
 
+    pub(in crate::dht) pending_link_bases: HashMap<Address, Link>,
     actions: HashMap<ActionWrapper, Result<Address, HolochainError>>,
 }
 
@@ -43,6 +45,7 @@ impl DhtStore {
         DhtStore {
             content_storage,
             meta_storage,
+            pending_link_bases: HashMap::new(),
             actions: HashMap::new(),
         }
     }
